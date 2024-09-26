@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Upload to Cloudinary</title>
+    <script>
+        // Cloudinary configuration
+        const cloudinaryUrl = 'https://api.cloudinary.com/v1_1/db8pwlpij/image/upload';
+        const unsignedUploadPreset = 'my_unsigned_upload'; // Replace with your actual unsigned upload preset
+
+        window.uploadImage = async function() {
+            const file = document.getElementById('fileInput').files[0];
+            if (!file) {
+                alert('Please select a file!');
+                return;
+            }
+
+            const formData = new FormData();
+            formData.append('file', file);
+            formData.append('upload_preset', unsignedUploadPreset);
+
+            try {
+                const response = await fetch(cloudinaryUrl, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (!response.ok) {
+                    throw new Error('Upload failed');
+                }
+
+                const data = await response.json();
+                alert('File uploaded successfully!');
+                saveImageUrl(data.secure_url);
+            } catch (error) {
+                console.error('Error uploading the image:', error);
+            }
+        };
+
+        // Save image URL to display it later
+        const images = [];
+
+        function saveImageUrl(url) {
+            images.push(url);
+            displayImages();
+        }
+
+        // Display uploaded images
+        function displayImages() {
+            const imageGallery = document.getElementById('imageGallery');
+            imageGallery.innerHTML = ''; // Clear previous images
+
+            images.forEach(url => {
+                const imgElement = document.createElement('img');
+                imgElement.src = url;
+                imgElement.alt = 'Uploaded image';
+                imgElement.style.maxWidth = '200px';
+                imgElement.style.margin = '10px';
+                imageGallery.appendChild(imgElement);
+            });
+        }
+    </script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        img {
+            max-width: 200px;
+            margin: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Upload Image to Cloudinary</h1>
+    <input type="file" id="fileInput" accept="image/*">
+    <button id="uploadButton" onclick="uploadImage()">Upload</button>
+
+    <h2>Uploaded Images</h2>
+    <div id="imageGallery"></div>
+
+</body>
+</html>
